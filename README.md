@@ -130,6 +130,8 @@ src/
 
 ## API Endpoints
 
+All example `curl` commands below assume the application is running locally at `http://localhost:4110`.
+
 ### Users
 
 #### Get All Users
@@ -151,6 +153,11 @@ Returns a list of all users registered in the system.
 ]
 ```
 
+**curl:**
+```bash
+curl -X GET http://localhost:4110/api/users
+```
+
 #### Create User
 **POST** `/api/users`
 
@@ -159,8 +166,17 @@ Creates a new user.
 **Request Body:**
 ```json
 {
-  "username": "Fawwaz"
+  "username": "fawwaz_gaul"
 }
+```
+
+**curl:**
+```bash
+curl -X POST http://localhost:4110/api/users \
+  -H "Content-Type: application/json" \
+  -d '{
+    "username": "fawwaz_gaul"
+  }'
 ```
 
 ---
@@ -172,6 +188,11 @@ Creates a new user.
 
 Returns all bill groups.
 
+**curl:**
+```bash
+curl -X GET http://localhost:4110/api/bill-groups
+```
+
 #### Create Bill Group
 **POST** `/api/bill-groups`
 
@@ -180,8 +201,17 @@ Creates a new bill group.
 **Request Body:**
 ```json
 {
-  "name": "Trip to Bandung"
+  "name": "Trip to Dayeuhkolot"
 }
+```
+
+**curl:**
+```bash
+curl -X POST http://localhost:4110/api/bill-groups \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Trip to Dayeuhkolot"
+  }'
 ```
 
 ---
@@ -192,6 +222,11 @@ Creates a new bill group.
 **GET** `/api/group-members`
 
 Returns all group members.
+
+**curl:**
+```bash
+curl -X GET http://localhost:4110/api/group-members
+```
 
 #### Add User to Group
 **POST** `/api/group-members`
@@ -210,6 +245,16 @@ Adds a user to a bill group.
 }
 ```
 
+**curl:**
+```bash
+curl -X POST http://localhost:4110/api/group-members \
+  -H "Content-Type: application/json" \
+  -d '{
+    "group": { "id": 1 },
+    "user": { "id": 1 }
+  }'
+```
+
 ---
 
 ### Expenses
@@ -219,6 +264,11 @@ Adds a user to a bill group.
 
 Returns all expenses.
 
+**curl:**
+```bash
+curl -X GET http://localhost:4110/api/expenses
+```
+
 #### Create Expense
 **POST** `/api/expenses`
 
@@ -227,12 +277,23 @@ Creates a new expense.
 **Request Body:**
 ```json
 {
-  "description": "Dinner",
+  "description": "Bakso Beranak",
   "amount": 300000,
   "group": {
     "id": 1
   }
 }
+```
+
+**curl:**
+```bash
+curl -X POST http://localhost:4110/api/expenses \
+  -H "Content-Type: application/json" \
+  -d '{
+    "description": "Bakso Beranak",
+    "amount": 300000,
+    "group": { "id": 1 }
+  }'
 ```
 
 ---
@@ -243,6 +304,11 @@ Creates a new expense.
 **GET** `/api/payments`
 
 Returns all payments.
+
+**curl:**
+```bash
+curl -X GET http://localhost:4110/api/payments
+```
 
 #### Create Payment
 **POST** `/api/payments`
@@ -264,6 +330,17 @@ Records a payment made by a user.
 
 > **Note:** `amountPaid` uses `BigDecimal` and can be provided as a plain numeric JSON value.
 
+**curl:**
+```bash
+curl -X POST http://localhost:4110/api/payments \
+  -H "Content-Type: application/json" \
+  -d '{
+    "expense": { "id": 1 },
+    "user": { "id": 1 },
+    "amountPaid": 140000
+  }'
+```
+
 ---
 
 ### Split Results
@@ -272,6 +349,11 @@ Records a payment made by a user.
 **GET** `/api/split-result`
 
 Returns all split results.
+
+**curl:**
+```bash
+curl -X GET http://localhost:4110/api/split-result
+```
 
 #### Create Split Result Manually
 **POST** `/api/split-result`
@@ -291,6 +373,17 @@ Creates a split result manually.
 }
 ```
 
+**curl:**
+```bash
+curl -X POST http://localhost:4110/api/split-result \
+  -H "Content-Type: application/json" \
+  -d '{
+    "expense": { "id": 1 },
+    "user": { "id": 1 },
+    "shareAmount": 100000
+  }'
+```
+
 #### Equal Split
 **POST** `/api/split-result/expense/{expenseId}/equal`
 
@@ -301,6 +394,11 @@ Splits an expense equally between the participants.
 POST /api/split-result/expense/1/equal
 ```
 The API calculates the share amount automatically based on the expense amount and the number of participants.
+
+**curl:**
+```bash
+curl -X POST http://localhost:4110/api/split-result/expense/1/equal
+```
 
 #### Percentage Split
 **POST** `/api/split-result/expense/{expenseId}/percentage`
@@ -323,6 +421,18 @@ POST /api/split-result/expense/1/percentage
 ```
 
 > The percentage values represent each user's share of the expense. The total percentage should equal 100%.
+
+**curl:**
+```bash
+curl -X POST http://localhost:4110/api/split-result/expense/1/percentage \
+  -H "Content-Type: application/json" \
+  -d '{
+    "percentages": {
+      "1": 60,
+      "2": 40
+    }
+  }'
+```
 
 ---
 
@@ -379,17 +489,6 @@ docker compose down
 ```
 
 ---
-
-[//]: # (## Database Persistence)
-
-[//]: # ()
-[//]: # (The MySQL container is currently configured **without a persistent Docker volume**.)
-
-[//]: # ()
-[//]: # (This means that if the database container is removed, the database data may be removed as well.)
-
-[//]: # ()
-[//]: # (If persistent data is required, a Docker volume can be added to the MySQL service.)
 
 ## Getting Started
 
@@ -516,3 +615,22 @@ Possible improvements for future versions include:
 ## Author
 
 **Qmaz Fawwaz Syafta**
+
+## Submission Requirements:
+
+***Personalization:***
+
+As a requirement, every settlement response also includes two additional fields: `service_charge_pct` and `service_charge_amount`. Below is how these values are calculated for my GitHub username (`qfwz`), computed dynamically in code instead of being hardcoded.
+
+**GitHub Username:** `qfwz`
+
+**Calculation:**
+1. Unicode (ASCII) sum of `qfwz`: `113 + 102 + 119 + 122 = 456`
+2. `service_charge_pct = 456 % 10 = 6` → **6%**
+3. `service_charge_amount` is this 6% applied to the total group expenses after generating the settlement.
+
+
+***Submission Question***:
+### What was the hardest design decision you made while building this, and what trade-off did you accept?
+
+The hardest design decision was how to model the bill-splitting flow while keeping the API simple and easy to use. I chose to separate expenses, payments, split results, and settlements into different entities instead of putting all of the information into a single model. The trade-off was having more entities and relationships to manage, which makes the implementation more complex. However, this approach makes each part of the system easier to understand, maintain, and extend. For example, different splitting methods can generate their own split results without changing the expense or payment structure.
