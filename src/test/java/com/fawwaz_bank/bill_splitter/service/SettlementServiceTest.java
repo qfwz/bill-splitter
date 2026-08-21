@@ -46,7 +46,7 @@ class SettlementServiceTest {
         group.setId(1L);
         group.setName("Pacaran");
 
-        // 3 MEMBERS
+        // 2 MEMBERS
         User kiki = new User();
         kiki.setId(1L);
         kiki.setUsername("kiki");
@@ -63,8 +63,8 @@ class SettlementServiceTest {
         );
 
         // SHARE IS CALCULATED MANUALLY SINCE THIS IS ONLY A SETTLEMENT TEST
-        // IN THIS CASE BOUBA IS ONLY PAYING FOR DRINKS (16.000)
-        // KIKI IS PAYING FOR FOOD (42.000)
+        // BOUBA IS ONLY PAYING FOR DRINKS (16.000)
+        // ITS KIKI's TURN TO PAY FOR FOOD TODAY (42.000)
         SplitResult kikiSplit = new SplitResult(
                 expense,
                 kiki,
@@ -159,6 +159,7 @@ class SettlementServiceTest {
         );
 
         // SHARE IS CALCULATED MANUALLY SINCE THIS IS ONLY A SETTLEMENT TEST
+        // THEY ATE THE SAME MEAL SO IT SHOULD BE EQUAL SPLIT
         // 120.000 / 3 = 40.000
         SplitResult fawwazSplit = new SplitResult(
                 expense,
@@ -278,8 +279,8 @@ class SettlementServiceTest {
         );
 
         // SHARE IS CALCULATED MANUALLY SINCE THIS IS ONLY A SETTLEMENT TEST
-        // GANON IS PAYING FOR HALF THE BILL (475.000)
-        // THE REST IS PAYING EQUALLY ( 475.000 / 4 = 118.750)
+        // GANON IS PAYING FOR HALF THE BILL (950.000 /2 = 475.000)
+        // THE REST OF THE GANG IS PAYING EQUALLY ( 475.000 / 4 = 118.750)
 
         SplitResult ganonSplit = new SplitResult(
                 expense,
