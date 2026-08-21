@@ -1,5 +1,6 @@
 package com.fawwaz_bank.bill_splitter.controller;
 
+import com.fawwaz_bank.bill_splitter.dto.CreateUserRequest;
 import com.fawwaz_bank.bill_splitter.model.User;
 import com.fawwaz_bank.bill_splitter.service.UserService;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +23,12 @@ public class UserController {
     }
 
     @PostMapping
-    public User createUser(@RequestBody User user) {
+    public User addUser(
+            @RequestBody CreateUserRequest request) {
+
+        User user = new User();
+        user.setUsername(request.getUsername());
+
         return userService.createUser(user);
     }
 }

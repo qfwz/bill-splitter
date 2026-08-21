@@ -4,7 +4,6 @@ import com.fawwaz_bank.bill_splitter.dto.SettlementResponse;
 import com.fawwaz_bank.bill_splitter.model.*;
 import com.fawwaz_bank.bill_splitter.repository.*;
 import org.springframework.stereotype.Service;
-
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -19,7 +18,7 @@ public class SettlementService {
     private final ExpenseRepository expenseRepository;
     private final BillGroupRepository billGroupRepository;
 
-    //    USERNAME GITHUB
+    // GITHUB USERNAME
     private static final String GITHUB_USERNAME = "qfwz";
 
     public SettlementService(
@@ -74,12 +73,34 @@ public class SettlementService {
                                     expense.getId()
                             );
 
+            // Validate that all of the expense amount
+            // has been assigned to split results
+            BigDecimal totalSplit = BigDecimal.ZERO;
+
+            for (SplitResult splitResult : splitResults) {
+
+                totalSplit =
+                        totalSplit.add(
+                                splitResult.getShareAmount()
+                        );
+            }
+
+            if (totalSplit.compareTo(expense.getAmount()) != 0) {
+
+                throw new RuntimeException(
+                        "Split results do not match expense amount "
+                                + "for expense ID: "
+                                + expense.getId()
+                );
+            }
+
             List<Payment> payments =
                     paymentRepository
                             .findByExpenseId(
                                     expense.getId()
                             );
 
+            // Calculate user balances from split results
             for (SplitResult splitResult :
                     splitResults) {
 
@@ -97,6 +118,7 @@ public class SettlementService {
                 );
             }
 
+            // Add payments to user balances
             for (Payment payment : payments) {
 
                 Long userId =
@@ -129,16 +151,13 @@ public class SettlementService {
             amountLeftToPay = BigDecimal.ZERO;
         }
 
+        // ==============================
+        // SERVICE CHARGE
+        // ==============================
 
-//        ==============================
-//        SERVICE CHARGE
-//        ==============================
-
-        // kalkulasi persentase
         int serviceChargePct =
                 calculateServiceChargePct();
 
-        // kalkulasi jumlah nominal
         BigDecimal serviceChargeAmount =
                 totalExpenses
                         .multiply(
@@ -150,10 +169,9 @@ public class SettlementService {
                                 BigDecimal.valueOf(100)
                         );
 
-//        ==============================
-//        END SERVICE CHARGE
-//        ==============================
-
+        // ==============================
+        // END SERVICE CHARGE
+        // ==============================
 
         List<Long> debtors = new ArrayList<>();
         List<Long> creditors = new ArrayList<>();
@@ -230,8 +248,6 @@ public class SettlementService {
         return new SettlementResponse(
                 settlements,
                 amountLeftToPay,
-
-                // SERVICE CHARGE
                 serviceChargePct,
                 serviceChargeAmount
         );
@@ -265,10 +281,9 @@ public class SettlementService {
         );
     }
 
-
-//    ==============================
-//    SERVICE CHARGE CALCULATION
-//    ==============================
+    // ==============================
+    // SERVICE CHARGE CALCULATION
+    // ==============================
 
     private int calculateServiceChargePct() {
 
@@ -284,7 +299,6 @@ public class SettlementService {
         return sum % 10;
     }
 
-
     public SettlementResponse getSettlementResponse(Long groupId) {
 
         List<Settlement> settlements =
@@ -298,9 +312,10 @@ public class SettlementService {
 
         for (Expense expense : expenses) {
 
-            totalExpense = totalExpense.add(
-                    expense.getAmount()
-            );
+            totalExpense =
+                    totalExpense.add(
+                            expense.getAmount()
+                    );
 
             List<Payment> payments =
                     paymentRepository.findByExpenseId(
@@ -309,9 +324,10 @@ public class SettlementService {
 
             for (Payment payment : payments) {
 
-                totalPayment = totalPayment.add(
-                        payment.getAmountPaid()
-                );
+                totalPayment =
+                        totalPayment.add(
+                                payment.getAmountPaid()
+                        );
             }
         }
 
@@ -322,16 +338,13 @@ public class SettlementService {
             amountLeftToPay = BigDecimal.ZERO;
         }
 
+        // ==============================
+        // SERVICE CHARGE
+        // ==============================
 
-//        ==============================
-//        SERVICE CHARGE
-//        ==============================
-
-        // kalkulasi persentase
         int serviceChargePct =
                 calculateServiceChargePct();
 
-        // kalkulasi jumlah
         BigDecimal serviceChargeAmount =
                 totalExpense
                         .multiply(
@@ -343,16 +356,13 @@ public class SettlementService {
                                 BigDecimal.valueOf(100)
                         );
 
-//        ==============================
-//        END SERVICE CHARGE
-//        ==============================
-
+        // ==============================
+        // END SERVICE CHARGE
+        // ==============================
 
         return new SettlementResponse(
                 settlements,
                 amountLeftToPay,
-
-                // SERVICE CHARGE
                 serviceChargePct,
                 serviceChargeAmount
         );

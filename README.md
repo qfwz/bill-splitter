@@ -18,6 +18,7 @@ A REST API for managing shared bills, expenses, payments, and bill splitting bet
     - [Expenses](#expenses)
     - [Payments](#payments)
     - [Split Results](#split-results)
+    - [Settlements](#settlements)
 - [Swagger Documentation](#swagger-documentation)
 - [Database Configuration](#database-configuration)
 - [Docker Compose](#docker-compose)
@@ -236,12 +237,8 @@ Adds a user to a bill group.
 **Request Body:**
 ```json
 {
-  "group": {
-    "id": 1
-  },
-  "user": {
-    "id": 1
-  }
+  "groupId": 1,
+  "userId": 1
 }
 ```
 
@@ -250,8 +247,8 @@ Adds a user to a bill group.
 curl -X POST http://localhost:4110/api/group-members \
   -H "Content-Type: application/json" \
   -d '{
-    "group": { "id": 1 },
-    "user": { "id": 1 }
+    "groupId": 1,
+    "userId": 1
   }'
 ```
 
@@ -279,9 +276,7 @@ Creates a new expense.
 {
   "description": "Bakso Beranak",
   "amount": 300000,
-  "group": {
-    "id": 1
-  }
+  "groupId": 1
 }
 ```
 
@@ -292,7 +287,7 @@ curl -X POST http://localhost:4110/api/expenses \
   -d '{
     "description": "Bakso Beranak",
     "amount": 300000,
-    "group": { "id": 1 }
+    "groupId": 1
   }'
 ```
 
@@ -328,7 +323,7 @@ Records a payment made by a user.
 }
 ```
 
-> **Note:** `amountPaid` uses `BigDecimal` and can be provided as a plain numeric JSON value.
+[//]: # (> **Note:** `amountPaid` uses `BigDecimal` and can be provided as a plain numeric JSON value.)
 
 **curl:**
 ```bash
@@ -363,12 +358,8 @@ Creates a split result manually.
 **Request Body:**
 ```json
 {
-  "expense": {
-    "id": 1
-  },
-  "user": {
-    "id": 1
-  },
+  "expenseId": 1,
+  "userId": 1,
   "shareAmount": 100000
 }
 ```
@@ -378,12 +369,12 @@ Creates a split result manually.
 curl -X POST http://localhost:4110/api/split-result \
   -H "Content-Type: application/json" \
   -d '{
-    "expense": { "id": 1 },
-    "user": { "id": 1 },
+    "expenseId": 1,
+    "userId": 1,
     "shareAmount": 100000
   }'
 ```
-
+> Before generating settlements, the total `shareAmount` for each expense must exactly match the expense amount. If the total `shareAmount` does not match the expense amount, settlement generation will return an error.
 #### Equal Split
 **POST** `/api/split-result/expense/{expenseId}/equal`
 
@@ -436,6 +427,40 @@ curl -X POST http://localhost:4110/api/split-result/expense/1/percentage \
 
 ---
 
+### Settlements
+
+#### Get All Settlements
+**GET** `/api/groups/{groupId}/settlements`
+
+Returns the settlements for a bill group.
+
+**Example:**
+```
+GET /api/groups/1/settlements
+```
+
+**curl:**
+```bash
+curl -X GET http://localhost:4110/api/groups/1/settlements
+```
+
+#### Generate Settlements
+**POST** `/api/groups/{groupId}/settlements/generate`
+
+Calculates settlements for a bill group based on its expenses, split results, and payments. This endpoint does not require a request body.
+
+**Example:**
+```
+POST /api/groups/1/settlements/generate
+```
+
+**curl:**
+```bash
+curl -X POST http://localhost:4110/api/groups/1/settlements/generate
+```
+
+---
+
 ## Swagger Documentation
 
 Swagger UI is available after the application is running. It will provide you with the required JSON body for each request.
@@ -451,10 +476,11 @@ http://localhost:4110/swagger-ui/index.html
 - The application uses **MySQL 8**.
 - When running with Docker Compose, the application connects to the MySQL container using the Docker service name.
 - The database configuration uses environment variables instead of storing the database password directly in the source code.
+- Make sure to create a `.env` file in root directory before running Docker Compose.
 
-**Example environment variable:**
+**Example environment variable/.env file:**
 ```
-DB_PASSWORD=your_password
+DB_PASSWORD=put_your_db_password_here
 ```
 
 ---
@@ -520,7 +546,7 @@ A typical bill splitting process can be performed in the following order:
 5. Choose a splitting method.
 6. Generate the split result.
 7. Record payments.
-8. Calculate or manage settlements.
+8. Calculate or manage settlements using `POST /api/groups/{groupId}/settlements/generate`.
 
 ---
 
@@ -599,16 +625,9 @@ The API can be tested using Swagger UI, Postman, or another REST API client but 
 Possible improvements for future versions include:
 
 - Add authentication and authorization
-- Add DTOs for all API requests and responses
 - Improve global exception handling
 - Add validation for request bodies
-- Add persistent Docker volumes
-- Add automated unit and integration tests
-- Improve settlement calculation
-- Add transaction management
-- Add pagination for large datasets
-- Add API versioning
-- Add deployment configuration
+- Expand existig automated unit test coverage using JUnit Jupiter and Mockito
 
 ---
 

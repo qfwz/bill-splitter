@@ -1,10 +1,13 @@
 package com.fawwaz_bank.bill_splitter.controller;
 
+import com.fawwaz_bank.bill_splitter.dto.CreateSplitResultRequest;
 import com.fawwaz_bank.bill_splitter.model.SplitResult;
+import com.fawwaz_bank.bill_splitter.model.User;
 import com.fawwaz_bank.bill_splitter.service.SplitResultService;
 import com.fawwaz_bank.bill_splitter.model.Expense;
 import com.fawwaz_bank.bill_splitter.service.ExpenseService;
 import com.fawwaz_bank.bill_splitter.dto.PercentageSplitRequest;
+import com.fawwaz_bank.bill_splitter.service.UserService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,13 +18,15 @@ public class SplitResultController {
 
     private final SplitResultService service;
     private final ExpenseService expenseService;
+    private final UserService userService;
 
     public SplitResultController(
             SplitResultService service,
-            ExpenseService expenseService) {
+            ExpenseService expenseService, UserService userService) {
 
         this.service = service;
         this.expenseService = expenseService;
+        this.userService = userService;
     }
 
     @GetMapping
@@ -31,9 +36,27 @@ public class SplitResultController {
 
     @PostMapping
     public SplitResult addParticipant(
-            @RequestBody SplitResult participant) {
+            @RequestBody CreateSplitResultRequest request) {
 
-        return service.addParticipant(participant);
+        Expense expense =
+                expenseService.getExpenseById(
+                        request.getExpenseId()
+                );
+
+        User user =
+                userService.getUserById(
+                        request.getUserId()
+                );
+
+        SplitResult splitResult = new SplitResult();
+
+        splitResult.setExpense(expense);
+        splitResult.setUser(user);
+        splitResult.setShareAmount(
+                request.getShareAmount()
+        );
+
+        return service.addParticipant(splitResult);
     }
 
     @PostMapping("/expense/{expenseId}/equal")

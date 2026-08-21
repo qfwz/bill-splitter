@@ -1,6 +1,9 @@
 package com.fawwaz_bank.bill_splitter.controller;
 
+import com.fawwaz_bank.bill_splitter.dto.CreateExpenseRequest;
+import com.fawwaz_bank.bill_splitter.model.BillGroup;
 import com.fawwaz_bank.bill_splitter.model.Expense;
+import com.fawwaz_bank.bill_splitter.service.BillGroupService;
 import com.fawwaz_bank.bill_splitter.service.ExpenseService;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,9 +14,14 @@ import java.util.List;
 public class ExpenseController {
 
     private final ExpenseService expenseService;
+    private final BillGroupService billGroupService;
 
-    public ExpenseController(ExpenseService expenseService) {
+    public ExpenseController(
+            ExpenseService expenseService,
+            BillGroupService billGroupService) {
+
         this.expenseService = expenseService;
+        this.billGroupService = billGroupService;
     }
 
     @GetMapping
@@ -22,7 +30,18 @@ public class ExpenseController {
     }
 
     @PostMapping
-    public Expense createExpense(@RequestBody Expense expense) {
+    public Expense addExpense(
+            @RequestBody CreateExpenseRequest request) {
+
+        BillGroup group =
+                billGroupService.getGroupById(request.getGroupId());
+
+        Expense expense = new Expense();
+
+        expense.setDescription(request.getDescription());
+        expense.setAmount(request.getAmount());
+        expense.setGroup(group);
+
         return expenseService.createExpense(expense);
     }
 }

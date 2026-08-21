@@ -1,5 +1,6 @@
 package com.fawwaz_bank.bill_splitter.controller;
 
+import com.fawwaz_bank.bill_splitter.dto.CreateBillGroupRequest;
 import com.fawwaz_bank.bill_splitter.model.BillGroup;
 import com.fawwaz_bank.bill_splitter.service.BillGroupService;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +23,11 @@ public class BillGroupController {
     }
 
     @PostMapping
-    public BillGroup createGroup(@RequestBody BillGroup group) {
-        return billGroupService.createGroup(group);
+    public BillGroup createGroup(@RequestBody CreateBillGroupRequest group) {
+
+        BillGroup billGroup = new BillGroup();
+        billGroup.setName(group.getName());
+
+        return billGroupService.createGroup(billGroup);
     }
 }

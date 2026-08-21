@@ -22,4 +22,9 @@ public class BillGroupService {
     public BillGroup createGroup(BillGroup group) {
         return billGroupRepository.save(group);
     }
+
+    public BillGroup getGroupById(Long id) {
+        return billGroupRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Group not found"));
+    }
 }
